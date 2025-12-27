@@ -10,13 +10,25 @@ import {
 import { SubscriptionCharges } from './subscriptionCharges.entity';
 import { PriceCurrencyPair } from './priceCurrencyPair.entity';
 
+export enum INTERVAL {
+  Month = 'month',
+  Year = 'year',
+}
+
 @Entity('subChargesVariant')
 export class SubChargesVariant {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({
+    type: 'enum',
+    enum: INTERVAL,
+    default: [INTERVAL.Month],
+  })
+  interval: INTERVAL;
+
   @Column()
-  duration: string;
+  intervalCount: number;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -167,6 +167,25 @@ export class PaymentService {
     return { data: paymentData };
   }
 
+  calculateSubscriptionEnd(
+    currentEnd: Date | null,
+    interval: 'month' | 'year',
+    count: number,
+  ): Date {
+    const base =
+      currentEnd && currentEnd > new Date() ? new Date(currentEnd) : new Date();
+
+    if (interval === 'month') {
+      base.setMonth(base.getMonth() + count);
+    }
+
+    if (interval === 'year') {
+      base.setFullYear(base.getFullYear() + count);
+    }
+
+    return base;
+  }
+
   async getSubHistory(userId: number) {
     const history = await this.subscription.find({
       where: {
@@ -209,16 +228,23 @@ export class PaymentService {
       const variant = charges?.variant.find((v) => v.id === sub?.variantId);
       //use duration if user is not an auto renew else use flutterwave exp date
       // const duration = variant?.duration;
-      console.log(data);
-      if (sub) {
-        const update = await this.subscription.update(
-          { id: data.meta_data.transaction },
-          {
-            paymentStatus: data.data.status,
-            subscriptionStatus: SUB_STATUS.ACTIVE,
-            // expireAt:
-          },
+      if (variant) {
+        const newEnd = this.calculateSubscriptionEnd(
+          sub?.expireAt ?? null,
+          variant?.interval,
+          variant.intervalCount,
         );
+        console.log(data);
+        if (sub) {
+          const update = await this.subscription.update(
+            { id: data.meta_data.transaction },
+            {
+              paymentStatus: data.data.status,
+              subscriptionStatus: SUB_STATUS.ACTIVE,
+              // expireAt:
+            },
+          );
+        }
       }
     }
   }
