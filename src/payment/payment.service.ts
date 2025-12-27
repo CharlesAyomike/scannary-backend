@@ -223,27 +223,29 @@ export class PaymentService {
       const sub = await this.subscription.findOneBy({
         id: data.meta_data.transaction,
       });
+      if (sub) {
+        const charges = await this.charges.findOneBy({ id: sub?.chargesId });
+        const variant = charges?.variant.find((v) => v.id === sub?.variantId);
 
-      const charges = await this.charges.findOneBy({ id: sub?.chargesId });
-      const variant = charges?.variant.find((v) => v.id === sub?.variantId);
-      //use duration if user is not an auto renew else use flutterwave exp date
-      // const duration = variant?.duration;
-      if (variant) {
-        const newEnd = this.calculateSubscriptionEnd(
-          sub?.expireAt ?? null,
-          variant?.interval,
-          variant.intervalCount,
-        );
-        console.log(data);
-        if (sub) {
+        if (variant) {
+          const newEnd = this.calculateSubscriptionEnd(
+            sub?.expireAt ?? null,
+            variant?.interval,
+            variant.intervalCount,
+          );
+
           const update = await this.subscription.update(
             { id: data.meta_data.transaction },
             {
               paymentStatus: data.data.status,
               subscriptionStatus: SUB_STATUS.ACTIVE,
-              // expireAt:
+              expireAt: newEnd,
             },
           );
+
+          if (!update) {
+            //report to admin here
+          }
         }
       }
     }
