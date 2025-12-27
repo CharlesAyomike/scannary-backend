@@ -11,6 +11,7 @@ import { PaymentModule } from './payment/payment.module';
 import { ProfileModule } from './profile/profile.module';
 import { CountryCurrencyModule } from './country-currency/country-currency.module';
 import { FileModule } from './file/file.module';
+import { OutletModule } from './outlet/outlet.module';
 import pgConfig from './config/pgConfig';
 
 @Module({
@@ -33,6 +34,7 @@ import pgConfig from './config/pgConfig';
     ProfileModule,
     CountryCurrencyModule,
     FileModule,
+    OutletModule,
   ],
 })
 export class AppModule {}

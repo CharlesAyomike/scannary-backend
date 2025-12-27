@@ -13,6 +13,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { Subscription } from './subscriptions.entity';
 import { UserPaymentDetails } from './usersPaymentDetail.entity';
+import { Outlet } from './outlet.entity';
 
 export enum AccountType {
   USER = 'user',
@@ -94,10 +95,13 @@ export class Users {
   deletedAt: Date | null;
 
   @OneToMany(() => Subscription, (subscription) => subscription.user)
-  subscriptions: Subscription;
-
+  subscriptions: Subscription[];
+  //may remove this(paymentDetails)
   @OneToMany(() => UserPaymentDetails, (paymentDetails) => paymentDetails.user)
-  paymentDetails: UserPaymentDetails;
+  paymentDetails: UserPaymentDetails[];
+
+  @OneToMany(() => Outlet, (outlet) => outlet.owner)
+  outlet: Outlet[];
 
   @BeforeInsert()
   async hashPassword() {

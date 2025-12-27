@@ -7,9 +7,9 @@ import {
 import { SubscribeDto } from './dto/subscribe.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from 'src/entities/users.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { SubscriptionCharges } from 'src/entities/subscriptionCharges.entity';
-import { Subscription } from 'src/entities/subscriptions.entity';
+import { SUB_STATUS, Subscription } from 'src/entities/subscriptions.entity';
 import { ConfigService } from '@nestjs/config';
 import {
   FlutterwaveResponse,
@@ -87,11 +87,6 @@ export class PaymentService {
   }
 
   async subscribe(subscribeDto: SubscribeDto, userId: number) {
-    //check user country
-    //check sub and variant
-    //create sub and make payment status unpaid
-    //determine currency base on country and return payment url
-
     const user = await this.usersRepo.findOneBy({ id: userId });
 
     if (!user) {
@@ -126,7 +121,7 @@ export class PaymentService {
       userCurrency = currency.currency;
     }
 
-    //get variant price currency paid
+    //get variant price currency pair
     const priceCurrencyPairOfUser = variantExist.priceCurrencyPair.find(
       (cp) => cp.currency === userCurrency,
     );
@@ -172,14 +167,58 @@ export class PaymentService {
     return { data: paymentData };
   }
 
+  async getSubHistory(userId: number) {
+    const history = await this.subscription.find({
+      where: {
+        user: { id: userId },
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    return { data: history };
+  }
+
+  async getActiveSub(userId: number) {
+    const activeSub = await this.subscription.findOne({
+      where: {
+        user: { id: userId },
+        subscriptionStatus: SUB_STATUS.ACTIVE,
+        expireAt: MoreThan(new Date()),
+      },
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
+    if (!activeSub) {
+      throw new BadRequestException('no active subscription');
+    }
+
+    return activeSub;
+  }
+
   async webHookPayment(data: FlutterwaveWebhookEvent) {
     if (data.meta_data?.type === 'subscription') {
       const sub = await this.subscription.findOneBy({
         id: data.meta_data.transaction,
       });
 
+      const charges = await this.charges.findOneBy({ id: sub?.chargesId });
+      const variant = charges?.variant.find((v) => v.id === sub?.variantId);
+      //use duration if user is not an auto renew else use flutterwave exp date
+      // const duration = variant?.duration;
+      console.log(data);
       if (sub) {
-        //update some data here
+        const update = await this.subscription.update(
+          { id: data.meta_data.transaction },
+          {
+            paymentStatus: data.data.status,
+            subscriptionStatus: SUB_STATUS.ACTIVE,
+            // expireAt:
+          },
+        );
       }
     }
   }

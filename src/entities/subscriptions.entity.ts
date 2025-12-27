@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Users } from './users.entity';
 
-enum SUB_STATUS {
+export enum SUB_STATUS {
   ACTIVE = 'active',
   PENDIND = 'pending',
   EXPIRED = 'expired',
