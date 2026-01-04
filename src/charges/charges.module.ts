@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SubscriptionCharges } from 'src/entities/subscriptionCharges.entity';
 import { SubChargesVariant } from 'src/entities/subChargesVarient.entity';
 import { PriceCurrencyPair } from 'src/entities/priceCurrencyPair.entity';
+import { PlanFeatures } from 'src/entities/planFeatures.entity';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { PriceCurrencyPair } from 'src/entities/priceCurrencyPair.entity';
       SubscriptionCharges,
       SubChargesVariant,
       PriceCurrencyPair,
+      PlanFeatures,
     ]),
   ],
   controllers: [ChargesController],

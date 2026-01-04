@@ -12,6 +12,7 @@ import { Roles as AllowedRoles } from 'src/entities/users.entity';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { PriceCurrencyPairDto } from './dto/price-currency.dto';
 import { UpdatePriceCurrencyPairDto } from './dto/update-price-currency.dto';
+import { FeaturesDto } from './dto/features.dto';
 
 @Controller('charges')
 export class ChargesController {
@@ -84,5 +85,13 @@ export class ChargesController {
       +id,
       updatePriceCurrency,
     );
+  }
+
+  @ApiBearerAuth('jwt-auth')
+  @UserType(AccountType.ADMIN)
+  @Roles(AllowedRoles.Operator, AllowedRoles.SuperAdmin)
+  @Patch('add-features')
+  addFeatures(@Body() featuresDto: FeaturesDto) {
+    return this.chargesService.addFeature(featuresDto);
   }
 }

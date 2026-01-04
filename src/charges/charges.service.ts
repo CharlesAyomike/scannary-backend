@@ -10,6 +10,8 @@ import { UpdateChargeVariantDto } from './dto/update-charge-variant.dto';
 import { PriceCurrencyPair } from 'src/entities/priceCurrencyPair.entity';
 import { PriceCurrencyPairDto } from './dto/price-currency.dto';
 import { UpdatePriceCurrencyPairDto } from './dto/update-price-currency.dto';
+import { FeaturesDto } from './dto/features.dto';
+import { PlanFeatures } from 'src/entities/planFeatures.entity';
 
 @Injectable()
 export class ChargesService {
@@ -20,6 +22,8 @@ export class ChargesService {
     private ChargesVariantRepo: Repository<SubChargesVariant>,
     @InjectRepository(PriceCurrencyPair)
     private priceCurrencyPair: Repository<PriceCurrencyPair>,
+    @InjectRepository(PlanFeatures)
+    private planFeature: Repository<PlanFeatures>,
   ) {}
 
   async createCharge(createChargeDto: CreateChargeDto) {
@@ -135,6 +139,28 @@ export class ChargesService {
     const update = await this.priceCurrencyPair.update(id, updatePriceCurrency);
     if (update) {
       return { message: 'Plan variant updated successfully' };
+    }
+  }
+
+  async addFeature(featureDto: FeaturesDto) {
+    const { planId, ...features } = featureDto;
+
+    const plan = await this.ChargesRepo.findOneBy({ id: planId });
+
+    if (!plan) {
+      throw new BadRequestException('plan does not exist');
+    }
+
+    const newDto = {
+      ...features,
+      plan,
+    };
+
+    const create = this.ChargesRepo.create(newDto);
+    const save = await this.ChargesRepo.save(create);
+
+    if (save) {
+      return { message: 'feature added successfully' };
     }
   }
 }

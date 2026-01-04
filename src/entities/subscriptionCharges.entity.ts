@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { SubChargesVariant } from './subChargesVarient.entity';
+import { PlanFeatures } from './planFeatures.entity';
 
 @Entity('subscriptionCharges')
 export class SubscriptionCharges {
@@ -31,4 +32,9 @@ export class SubscriptionCharges {
     { eager: true },
   )
   variant: SubChargesVariant[];
+
+  @OneToMany(() => PlanFeatures, (planFeatures) => planFeatures.plan, {
+    eager: true,
+  })
+  planFeature: PlanFeatures[];
 }

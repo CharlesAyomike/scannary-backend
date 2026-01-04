@@ -219,6 +219,7 @@ export class PaymentService {
   }
 
   async webHookPayment(data: FlutterwaveWebhookEvent) {
+    console.log(data);
     if (data.meta_data?.type === 'subscription') {
       const sub = await this.subscription.findOneBy({
         id: data.meta_data.transaction,
